@@ -18,7 +18,6 @@ app.use(express.static("dist"));
 const PORT = 8081;
 const API_URL = "https://api.meaningcloud.com/sentiment-2.1";
 const API_KEY = process.env.API_KEY;
-const FULL_URL = `${API_URL}?key=${API_KEY}&url=${enteredArticleURL}&lang=en`;
 
 //Home page
 app.get("/", (req, res) => {
@@ -33,6 +32,7 @@ app.get("/test", (req, res) => {
 // post data to app
 app.post("/call-api", (req, res) => {
   const { enteredUrl } = req.body;
+  const FULL_URL = `${API_URL}?key=${API_KEY}&url=${enteredUrl}&lang=en`;
   axios(FULL_URL)
     .then((data) => {
       const {
