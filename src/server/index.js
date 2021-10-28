@@ -1,57 +1,65 @@
-const mockAPIResponse = require("./mockAPI.js");
-const PORT = 8081;
-require("dotenv").config();
+// require all dependencies
 const express = require("express");
 const bodyParser = require("body-parser");
-const axios = require("axios");
 const cors = require("cors");
-const API_URL = "https://api.meaningcloud.com/sentiment-2.1";
-const API_KEY = process.env.API_KEY;
-const app = express();
+const axios = require("axios");
+const mockAPI = require("./mockAPI");
 const path = require("path");
+require("dotenv").config();
+
+// initialize app and use packages
+const app = express();
 app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
-app.use(bodyParser.json());
 app.use(express.static("dist"));
 
-app.get("/", function (req, res) {
+// Main variables for enviroment
+const PORT = 8081;
+const API_URL = "https://api.meaningcloud.com/sentiment-2.1";
+const API_KEY = process.env.API_KEY;
+const FULL_URL = `${API_URL}?key=${API_KEY}&url=${enteredArticleURL}&lang=en`;
+
+//Home page
+app.get("/", (req, res) => {
   res.sendFile(path.resolve("src/client/views/index.html"));
 });
 
-app.post("/call-api", async (req, res) => {
-  const enteredArticleURL = req.body.enteredUrl;
-  const FULL_URL = `${API_URL}?key=${API_KEY}&url=${enteredArticleURL}&lang=en`;
-  console.log(enteredArticleURL, FULL_URL);
-  try {
-    const {
-      data: {
+// test
+app.get("/test", (req, res) => {
+  res.send(mockAPI);
+});
+
+// post data to app
+app.post("/call-api", (req, res) => {
+  const { enteredUrl } = req.body;
+  axios(FULL_URL)
+    .then((data) => {
+      const {
         sentence_list,
         score_tag,
         agreement,
         subjectivity,
         confidence,
         irony,
-      },
-    } = await axios(FULL_URL);
-    res.send({
-      text: sentence_list[0].text || "",
-      score_tag: score_tag,
-      agreement: agreement,
-      subjectivity: subjectivity,
-      confidence: confidence,
-      irony: irony,
+      } = data;
+
+      res.send({
+        text: sentence_list[0].text || "",
+        score_tag: score_tag,
+        agreement: agreement,
+        subjectivity: subjectivity,
+        confidence: confidence,
+        irony: irony,
+      });
+    })
+    .catch((error) => {
+      console.log(error.message);
     });
-  } catch (error) {
-    console.log(error.message);
-  }
 });
 
-app.get("/test", function (req, res) {
-  res.send(mockAPIResponse);
-});
-
+// listen to app on port 8081
 app.listen(PORT, (error) => {
   if (error) throw new Error(error);
-  console.log(`Server listening on port ${PORT}!`);
+  console.log(`Server listening on port ${PORT}`);
 });

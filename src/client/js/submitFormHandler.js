@@ -1,6 +1,9 @@
+// import validate url to check if url
 import validateURL from "./validateURL";
 
-const postData = async (url = "", data = {}) => {
+// define the post function
+
+async function postData(url = "", data = {}) {
   const response = await fetch(url, {
     method: "POST",
     credentials: "same-origin",
@@ -8,28 +11,40 @@ const postData = async (url = "", data = {}) => {
     headers: {
       "Content-Type": "application/json",
     },
-    body: JSON.stringify(data),
+    body: JSON.stringify(),
   });
   try {
     return await response.json();
   } catch (error) {
     console.log(error);
   }
-};
+}
 
+// accessing dom elements
+const text = document.getElementById("text");
+const agreement = document.getElementById("agreement");
+const confidance = document.getElementById("confidence");
+const score = document.getElementById("score_tag");
+const subjectivity = document.getElementById("subjectivity");
+const irony = document.getElementById("irony");
+const url = document.getElementById("article-url");
+
+// defining submit form functionality
 function submitFormHandler() {
-  console.log("this is entered");
-  const enteredUrl = document.getElementById("article-url").value;
+  console.log("Submitting...");
+  const enteredUrl = url.value;
+
+  // checking URL Validity and making the request
   if (validateURL(enteredUrl)) {
     postData("http://localhost:8081/call-api", {
       enteredUrl,
     }).then((res) => {
-      document.getElementById("text").textContent = res.text;
-      document.getElementById("agreement").textContent = res.agreement;
-      document.getElementById("confidence").textContent = res.confidence;
-      document.getElementById("score_tag").textContent = res.score_tag;
-      document.getElementById("subjectivity").textContent = res.subjectivity;
-      document.getElementById("irony").textContent = res.irony;
+      text.textContent = `Text: ${res.text}`;
+      agreement.textContent = `Agreement: ${res.agreement}`;
+      confidance.textContent = `Confidance: ${res.confidence}`;
+      score.textContent = `Score tag: ${res.score_tag}`;
+      subjectivity.textContent = `Subjectivity: ${res.subjectivity}`;
+      irony.textContent = `Irony: ${res.irony}`;
     });
   } else {
     alert(`This Is Not a Valid URL:
